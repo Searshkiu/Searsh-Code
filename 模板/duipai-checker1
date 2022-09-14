@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    int t = 100;  //测试的次数
+    while (t--) {
+//        system("data > case.in");
+//        system("std < case.in > std.out");
+//        system("test < case.in > test.out");
+        if (system("fc P5049_16.out travel.out")) break;//std out and my out
+    }
+    if (t > 0) {
+        cout << "Wrong Answer check again!" << endl;
+    } else cout<<"Submit!"<<endl;
+    return 0;
+}
