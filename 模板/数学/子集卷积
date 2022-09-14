@@ -1,0 +1,54 @@
+[题面：【模板】子集卷积](https://www.luogu.com.cn/problem/P6097)
+
+```
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+const int N=1<<20|1;
+const int NN=22;
+const int M=1e9+9;
+int n,x;
+int pcnt[N];
+int a[NN][N],b[NN][N],c[NN][N];
+
+inline void orw(int *f, int tg) {
+	for(int o=2,k=1; o<=x; o<<=1, k<<=1) {
+		for(int i=0; i<x; i+=o)
+			for(int j=0; j<k; j++)
+				f[i+j+k]=(1ll*f[i+j+k]+1ll*f[i+j]*1ll*tg%M)%M;
+	}
+}
+
+inline void cal() {
+	for(int j=0;j<=n;j++){
+		for(int k=0;k<=j;k++){
+			for(int i=0; i<x; i++) c[j][i]=(1ll*c[j][i]+1ll*a[k][i]*1ll*b[j-k][i]%M)%M;
+		}
+	}
+}
+
+inline void out() {
+	for(int i=0; i<x; i++) printf("%d ",c[pcnt[i]][i]);
+}
+
+inline void OR() {
+	for(int i=0;i<=n;i++){
+		orw(a[i],1),orw(b[i],1);
+	}
+	cal();
+	for(int i=0;i<=n;i++) orw(c[i],M-1);
+	out();
+}
+
+int main() {
+	scanf("%d",&n);
+	x=1<<n;
+	for(int i=1; i<x; i++) pcnt[i]=pcnt[i>>1]+(i&1);
+//	printf("%d\n",pcnt[3]);
+	for(int i=0; i<x; i++) scanf("%d",&a[pcnt[i]][i]),a[pcnt[i]][i]%=M;
+	for(int i=0; i<x; i++) scanf("%d",&b[pcnt[i]][i]),b[pcnt[i]][i]%=M;
+	OR();
+	
+	return 0;
+}
+```
