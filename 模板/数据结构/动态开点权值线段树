@@ -1,0 +1,76 @@
+题面：https://www.luogu.com.cn/problem/P3369
+
+```
+#include<bits/stdc++.h>
+using namespace std;
+const int N=1e7+5;
+const int M=1e5+5;
+int n,op,cp=1;
+struct weightst{//weight segment tree
+	int ls,rs;
+	int cnt;
+	#define l(x) wst[x].l
+	#define r(x) wst[x].r
+	#define ls(x) wst[x].ls
+	#define rs(x) wst[x].rs
+	#define cnt(x) wst[x].cnt
+}wst[M<<2];//M*2 <<1
+map<int,int>mp;
+
+void pu(int p){
+	cnt(p)=cnt(ls(p))+cnt(rs(p));
+}
+
+void ins(int &p,int lb,int rb,int x,int tg){
+	if(!p){
+		p=++cp;
+		ls(cp)=rs(cp)=cnt(cp)=0;
+	}
+	if(lb==rb){
+		cnt(p)+=tg;
+		return;
+	}
+	int mid=lb+rb>>1;
+	if(mid>=x) ins(ls(p),lb,mid,x,tg);
+	else ins(rs(p),mid+1,rb,x,tg);  
+	pu(p);
+}
+
+int qrk(int p,int lb,int rb,int l,int r){
+	if(!p) return 0;
+	if(l<=lb && rb<=r) return cnt(p);
+	int ret=0;
+	int mid=lb+rb>>1;
+	if(l<=mid) ret+=qrk(ls(p),lb,mid,l,r);
+	if(mid<r) ret+=qrk(rs(p),mid+1,rb,l,r);
+	pu(p);
+	return ret;
+}
+
+int qid(int p,int lb,int rb,int k){
+	if(lb==rb) return lb;
+	int mid=lb+rb>>1;
+	if(cnt(ls(p))<k) return qid(rs(p),mid+1,rb,k-cnt(ls(p)));
+	else return qid(ls(p),lb,mid,k);
+}
+
+int main(){
+	scanf("%d",&n);
+	int rt=1;
+	while(n--){
+		int x;
+		scanf("%d%d",&op,&x);
+		if(op==1) ins(rt,1,N<<1,x+N,1),mp[x]++;
+		if(op==2){
+			ins(rt,1,N<<1,x+N,-1);
+			mp[x]--;
+			if(!mp[x]) mp.erase(x);	
+		}
+		if(op==3) printf("%d\n",qrk(rt,1,N<<1,1,x+N-1)+1);//query the rank of x
+		if(op==4) printf("%d\n",qid(rt,1,N<<1,x)-N);//query the id of the xth number
+		if(op==5) printf("%d\n",(--mp.lower_bound(x))->first);//front
+		if(op==6) printf("%d\n",mp.upper_bound(x)->first);//back
+	}
+	return 0;
+}
+```
