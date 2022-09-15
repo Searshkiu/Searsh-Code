@@ -1,0 +1,138 @@
+题面：一棵n个节点的树，m次操作，每次将路径[a,b]的点的z类型+1，求最后每个点，哪个类型最多。
+
+#include<bits/stdc++.h>
+using namespace std;
+const int N=1e5+5;
+int n,m;
+struct edge {
+	int v,nxt;
+	edge() {}
+	edge(int _v,int _nxt) {
+		v=_v, nxt=_nxt;
+	}
+} e[N<<1];
+int ce,h[N];
+struct ope{
+	int cnt,no;
+	ope(){};
+	ope(int _cnt,int _no){
+		cnt=_cnt, no=_no;
+	}
+	friend bool operator < (const ope &a,const ope &b){
+		return (a.cnt==b.cnt)? (a.no>b.no): a.cnt<b.cnt;
+	}
+	friend ope operator + (ope a, ope b){
+		return ope(a.cnt+b.cnt,a.no);
+	}
+};
+inline void ade(int u,int v){
+	e[++ce]=edge(v,h[u]);
+	h[u]=ce;
+}
+
+struct seg_tree { 
+struct tree_node {
+	int ls,rs;
+	#define ls(x) wst[x].ls
+	#define rs(x) wst[x].rs
+} wst[N*40];
+
+ope mx[N*40];
+int cn;
+
+void pu(int p){mx[p]=max(mx[ls(p)],mx[rs(p)]);}
+	
+void ins(int &p,int lb,int rb,ope z){
+	if(!p){
+		p=++cn;
+		ls(cn)=rs(cn)=mx[cn].cnt=0;
+	}
+	if(lb==rb){
+		mx[p]=z+mx[p];
+		return;
+	}
+	int mid=lb+rb>>1;
+	if(z.no<=mid) ins(ls(p),lb,mid,z);
+	else ins(rs(p),mid+1,rb,z);
+	pu(p);
+}
+	
+void mg(int p1,int p2,int lb,int rb){
+	if(lb==rb){
+		mx[p1]=mx[p1]+mx[p2];
+		return;
+	}
+	int mid=lb+rb>>1;
+	if(ls(p1) && ls(p2)) mg(ls(p1),ls(p2),lb,mid);
+	else if(ls(p2)) ls(p1)=ls(p2);
+	if(rs(p1) && rs(p2)) mg(rs(p1),rs(p2),mid+1,rb);
+	else if(rs(p2)) rs(p1)=rs(p2);
+	pu(p1); 
+//	printf("%d\n",p1);
+}
+}st;
+int fa[N][20],dep[N],ans[N];
+vector< ope >op[N];
+
+struct chafen{
+	
+void dfs(int u,int f){
+	dep[u]=dep[f]+1;
+	fa[u][0]=f;
+	for(int i=1;i<20;i++) fa[u][i]=fa[fa[u][i-1]][i-1];
+	
+	for(int i=h[u];i;i=e[i].nxt){
+		int v=e[i].v;
+		if(v==f) continue;
+		dfs(v,u);
+	}
+}
+
+inline int lca(int x,int y){
+	if(dep[x]>dep[y]) swap(x,y);
+	int tope=dep[y]-dep[x];
+	for(int i=0;i<20;i++,tope>>=1){
+		if(tope&1) y=fa[y][i];
+	}
+	if(x==y) return x;
+	for(int i=19;i>=0;i--){
+		if(fa[x][i]!=fa[y][i]) x=fa[x][i], y=fa[y][i];
+	}
+	return fa[x][0];
+}
+
+}cf;
+
+void ana(int u,int f){
+	for(int i=h[u];i;i=e[i].nxt){
+		int v=e[i].v;
+		if(v==f) continue;
+		ana(v,u), st.mg(u,v,1,N);
+	}
+	
+	vector< ope > ::iterator it;
+	for(it=op[u].begin(); it!=op[u].end(); it++) st.ins(u,1,N,*it);
+	ans[u]=st.mx[u].no;
+}
+
+int main(){
+	scanf("%d%d",&n,&m);
+	st.cn=n;
+	for(int i=1,u,v;i<n;i++){
+		scanf("%d%d",&u,&v);
+		ade(u,v), ade(v,u);
+	}
+	cf.dfs(1,0);
+  
+	while(m--){
+		int a,b,z;
+		scanf("%d%d%d",&a,&b,&z);
+		op[a].push_back(ope(1,z)), op[b].push_back(ope(1,z));
+		int ca=cf.lca(a,b);
+		op[ca].push_back(ope(-1,z)), op[fa[ca][0]].push_back(ope(-1,z));
+	}
+  
+	ana(1,0);
+	for(int i=1;i<=n;i++) printf("%d\n",ans[i]);
+	return 0;
+}
