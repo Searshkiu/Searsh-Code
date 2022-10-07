@@ -1,4 +1,3 @@
-```c++
 #include<bits/stdc++.h>
 using namespace std;
 #define ll long long
@@ -60,4 +59,4 @@ int main(){
 	OR(),AND(),XOR();
 	return 0;
 }
-```
+
